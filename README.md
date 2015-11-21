@@ -408,6 +408,36 @@ Output:
 No repos :(
 ```
 
+### Length limit
+
+```json
+{
+  "long_text": "Some long text"
+}
+```
+
+Template:
+
+```html
+<p>{{long_text|5}}</p>
+```
+
+Output:
+```html
+<p>Some ...</p>
+```
+
+Template:
+
+```html
+<p>{{long_text|5|***}}</p>
+```
+
+Output:
+```html
+<p>Some ***</p>
+```
+
 ### Comments
 
 Comments begin with a bang and are ignored. The following template:
