@@ -554,10 +554,34 @@
       return value;
   };
 
+  Writer.prototype.limitedValue = function limitedValue (token, context) {
+    var value = null,
+        tmp_arr;
+
+    tmp_arr = token[1].split('|');
+    if (tmp_arr.length > 1) {
+      value = context.lookup(tmp_arr[0]);
+      if (value != null) {
+        tmp_arr[1] = +tmp_arr[1];
+        if (value.substr && (tmp_arr[1] < value.length)) {
+          value = value.substr(0, tmp_arr[1]) + ((tmp_arr[2])? tmp_arr[2]: '...');
+        }
+      }
+    }
+    return value;
+  };
+
   Writer.prototype.escapedValue = function escapedValue (token, context) {
     var value = context.lookup(token[1]);
-    if (value != null)
+
+    if (value != null) {
       return mustache.escape(value);
+    } else {
+      value = this.limitedValue(token, context);
+      if (value != null) {
+        return mustache.escape(value);
+      }
+    }
   };
 
   Writer.prototype.rawValue = function rawValue (token) {
