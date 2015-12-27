@@ -554,20 +554,55 @@
       return value;
   };
 
-  Writer.prototype.limitedValue = function limitedValue (token, context) {
+  Writer.prototype.processVerticalBar = function processVerticalBar (token, context) {
     var value = null,
-        tmp_arr;
+        tmp_arr,
+        tmp_val;
 
     tmp_arr = token[1].split('|');
     if (tmp_arr.length > 1) {
       value = context.lookup(tmp_arr[0]);
-      if (value != null) {
-        tmp_arr[1] = +tmp_arr[1];
-        if (value.substr && (tmp_arr[1] < value.length)) {
-          value = value.substr(0, tmp_arr[1]) + ((tmp_arr[2])? tmp_arr[2]: '...');
+      tmp_val = +tmp_arr[1];
+      if (tmp_val > 0) {
+        value = this.limitedValue(tmp_arr, value);
+      } else {
+        value = this.formattedNumber(tmp_arr, value);
+      }
+    }
+    return value;
+  };
+
+  Writer.prototype.formattedNumber = function formattedNumber (arr, value) {
+    var tmp_numeral,
+        tmp_number;
+
+    if (this.numeral) {
+      tmp_number = parseFloat(value);
+      if ((tmp_number === 0) || (tmp_number > 0)) {
+        tmp_numeral = this.numeral(tmp_number);
+        if (arr[1] !== '_') {
+          value = tmp_numeral.format(arr[1]);
+        } else {
+          value = tmp_numeral.format();
+        }
+      } else {
+        if (arr[2]) {
+          value = arr[2];
+        } else {
+          value = 0;
         }
       }
     }
+    return value;
+  };
+
+  Writer.prototype.limitedValue = function limitedValue (arr, value) {
+      if (value != null) {
+        arr[1] = +arr[1];
+        if (value.substr && (arr[1] < value.length)) {
+          value = value.substr(0, arr[1]) + ((arr[2])? arr[2]: '...');
+        }
+      }
     return value;
   };
 
@@ -577,7 +612,7 @@
     if (value != null) {
       return mustache.escape(value);
     } else {
-      value = this.limitedValue(token, context);
+      value = this.processVerticalBar(token, context);
       if (value != null) {
         return mustache.escape(value);
       }
